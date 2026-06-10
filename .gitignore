@@ -31,6 +31,9 @@ log.txt
 # macOS system files.
 .DS_Store
 
+# VS Code settings.
+**/.vscode/
+
 # Launcher-generated files.
 /dialogue.tab
 /dialogue.txt
