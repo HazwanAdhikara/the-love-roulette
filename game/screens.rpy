@@ -113,7 +113,7 @@ screen say(who, what):
     ## If there's a side image, display it above the text. Do not display on the
     ## phone variant - there's no room.
     if not renpy.variant("small"):
-        add SideImage() xalign 0.0 yalign 1.0
+        add Transform(SideImage(), xsize=150, ysize=250, fit="cover") xpos 30 ypos 810
 
 
 ## Make the namebox available for styling through the Character object.
@@ -355,7 +355,7 @@ screen main_menu():
     ## This ensures that any other menu screen is replaced.
     tag menu
 
-    add gui.main_menu_background
+    add Transform(gui.main_menu_background, xsize=1920, ysize=1080, fit="cover")
 
     ## This empty frame darkens the main menu.
     frame:
@@ -420,7 +420,7 @@ screen game_menu(title, scroll=None, yinitial=0.0, spacing=0):
     style_prefix "game_menu"
 
     if main_menu:
-        add gui.main_menu_background
+        add Transform(gui.main_menu_background, xsize=1920, ysize=1080, fit="cover")
     else:
         add gui.game_menu_background
 
@@ -1333,7 +1333,7 @@ screen nvl(dialogue, items=None):
                 action i.action
                 style "nvl_button"
 
-    add SideImage() xalign 0.0 yalign 1.0
+    add Transform(SideImage(), xsize=150, ysize=250, fit="cover") xpos 30 ypos 810
 
 
 screen nvl_dialogue(dialogue):

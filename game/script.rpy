@@ -19,15 +19,15 @@ define child = Character("Anak Kecil", color="#FFB6C1",
     side_image = "images/characters/anak.png")
 
 # Fullscreen background definitions
-image bg_investigasi = Transform("images/bg_investigasi.jpg", xsize=1280, ysize=720, fit="cover")
-image bg_anak_rumah_sakit = Transform("images/bg_anak_rumah_sakit.jpg", xsize=1280, ysize=720, fit="cover")
-image bg_gosip_rumah_sakit = Transform("images/bg_gosip_rumah_sakit.jpg", xsize=1280, ysize=720, fit="cover")
-image bg_ruang_manager = Transform("images/bg_ruang_manager.jpg", xsize=1280, ysize=720, fit="cover")
-image bg_loker_rumah_sakit = Transform("images/bg_loker_rumah_sakit.jpg", xsize=1280, ysize=720, fit="cover")
-image bg_kantor_polisi = Transform("images/bg_kantor_polisi.jpg", xsize=1280, ysize=720, fit="cover")
-image bg_rumah = Transform("images/bg_rumah.jpg", xsize=1280, ysize=720, fit="cover")
-image bg_berantakan = Transform("images/bg_berantakan.jpg", xsize=1280, ysize=720, fit="cover")
-image bg_ruang_tamu = Transform("images/bg_ruang_tamu.jpg", xsize=1280, ysize=720, fit="cover")
+image bg_investigasi = Transform("images/bg_investigasi.jpg", xsize=1920, ysize=1080, fit="cover")
+image bg_anak_rumah_sakit = Transform("images/bg_anak_rumah_sakit.jpg", xsize=1920, ysize=1080, fit="cover")
+image bg_gosip_rumah_sakit = Transform("images/bg_gosip_rumah_sakit.jpg", xsize=1920, ysize=1080, fit="cover")
+image bg_ruang_manager = Transform("images/bg_ruang_manager.jpg", xsize=1920, ysize=1080, fit="cover")
+image bg_loker_rumah_sakit = Transform("images/bg_loker_rumah_sakit.jpg", xsize=1920, ysize=1080, fit="cover")
+image bg_kantor_polisi = Transform("images/bg_kantor_polisi.jpg", xsize=1920, ysize=1080, fit="cover")
+image bg_rumah = Transform("images/bg_rumah.jpg", xsize=1920, ysize=1080, fit="cover")
+image bg_berantakan = Transform("images/bg_berantakan.jpg", xsize=1920, ysize=1080, fit="cover")
+image bg_ruang_tamu = Transform("images/bg_ruang_tamu.jpg", xsize=1920, ysize=1080, fit="cover")
 
 
 init python:
@@ -311,98 +311,121 @@ screen roulette_table():
     tag battle
     modal True
 
+    add "bg_ruang_tamu"
     frame:
-        xalign 0.5
-        yalign 0.5
-        xsize 1280
-        ysize 720
-        background "#0f121acc"
-        padding (36, 30)
+        background "#080406dd"
+        xfill True
+        yfill True
+
+    add "bg_ruang_tamu":
+        alpha 0.08
+        blur 20
+
+    frame:
+        xalign 0.5 yalign 0.5
+        xsize 1340 ysize 940
+        background "#0a0a10f0"
+        padding (32, 28)
 
         vbox:
             spacing 22
 
-            text "THE LOVE ROULETTE" size 44 xalign 0.5 color "#F5F5F5"
+            text "☦  ROULETTE  ☦" size 52 xalign 0.5 color "#6b0f0f" bold True
+
+            frame:
+                xfill True ysize 2 background "#6b0f0f33"
 
             hbox:
-                spacing 28
+                spacing 40
                 xalign 0.5
 
                 frame:
-                    xsize 500
-                    background "#13233bcc"
-                    padding (22, 18)
-
+                    xsize 520
+                    background "#0c1625e0"
+                    padding (24, 18)
                     vbox:
                         spacing 8
-                        text f"{owner_display_name('player')}" size 30 color "#4A90E2"
-                        text "HP: [player_hp]" size 26 color "#F0F0F0"
-                        text "Shield: [\"Aktif\" if player_shield else \"Mati\"]" size 22 color "#F0F0F0"
-                        text "Borgol: [\"Terpasang\" if player_handcuffed else \"Tidak\"]" size 22 color "#F0F0F0"
-                        text "Item: [len(player_items)] / [MAX_ITEM_SLOTS]" size 22 color "#F0F0F0"
+                        text f"{owner_display_name('player')}" size 28 color "#4A90E2" bold True
+                        text "HP: [player_hp]" size 22 color "#c8c8c8"
+                        text "Shield: [\"Aktif ✓\" if player_shield else \"Mati ✗\"]" size 20 color "#c8c8c8"
+                        text "Borgol: [\"Terpasang ✓\" if player_handcuffed else \"—\"]" size 20 color "#c8c8c8"
+                        text "Item: [len(player_items)] / [MAX_ITEM_SLOTS]" size 20 color "#c8c8c8"
 
                 frame:
-                    xsize 500
-                    background "#3b1115cc"
-                    padding (22, 18)
-
+                    xsize 520
+                    background "#250a0ae0"
+                    padding (24, 18)
                     vbox:
                         spacing 8
-                        text f"{owner_display_name('dealer')}" size 30 color "#D0021B"
-                        text "HP: [dealer_hp]" size 26 color "#F0F0F0"
-                        text "Shield: [\"Aktif\" if dealer_shield else \"Mati\"]" size 22 color "#F0F0F0"
-                        text "Borgol: [\"Terpasang\" if dealer_handcuffed else \"Tidak\"]" size 22 color "#F0F0F0"
-                        text "Item: [len(dealer_items)] / [MAX_ITEM_SLOTS]" size 22 color "#F0F0F0"
+                        text f"{owner_display_name('dealer')}" size 28 color "#cc1a1a" bold True
+                        text "HP: [dealer_hp]" size 22 color "#c8c8c8"
+                        text "Shield: [\"Aktif ✓\" if dealer_shield else \"Mati ✗\"]" size 20 color "#c8c8c8"
+                        text "Borgol: [\"Terpasang ✓\" if dealer_handcuffed else \"—\"]" size 20 color "#c8c8c8"
+                        text "Item: [len(dealer_items)] / [MAX_ITEM_SLOTS]" size 20 color "#c8c8c8"
 
-            hbox:
-                spacing 28
-                xalign 0.5
-
-                frame:
-                    xsize 600
-                    background "#1a1f27cc"
-                    padding (20, 18)
-
+            frame:
+                xfill True
+                background "#111116e0"
+                padding (20, 14)
+                hbox:
+                    spacing 40
+                    xalign 0.5
                     vbox:
+                        spacing 4
+                        text "GILIRAN" size 16 color "#555"
+                        text "[owner_display_name('player') if turn_owner == 'player' else owner_display_name('dealer')]" size 24 color "#e0e0e0" bold True
+                    vbox:
+                        spacing 4
+                        text "PELURU" size 16 color "#555"
+                        text "[sum(1 for b in revolver_cylinder if b)] live / [total_bullets - sum(1 for b in revolver_cylinder if b)] blank" size 24 color "#e0e0e0"
+                    vbox:
+                        spacing 4
+                        text "SISA" size 16 color "#555"
+                        text "[len(revolver_cylinder)] dari [total_bullets]" size 24 color "#e0e0e0"
+
+            if battle_message:
+                text battle_message size 20 xalign 0.5 color "#bb3030" italic True
+
+            if current_bullet_revealed is not None:
+                text "Peluru terintip: [current_bullet_revealed]" size 18 xalign 0.5 color "#666"
+
+            frame:
+                xfill True
+                background "#0c0c0ce0"
+                padding (18, 14)
+                vbox:
+                    spacing 10
+                    text f"INVENTORI" size 18 color "#444" bold True
+                    grid 3 1:
                         spacing 10
-                        text "Status Duel" size 24 color "#F5F5F5"
-                        text "Giliran: [owner_display_name('player') if turn_owner == 'player' else owner_display_name('dealer')]" size 22 color "#F5F5F5"
-                        text "Peluru terintip: [current_bullet_revealed if current_bullet_revealed is not None else 'Belum diketahui']" size 22 color "#F5F5F5"
-                        text "Peluru tersisa: [len(revolver_cylinder)] dari [total_bullets]" size 22 color "#F5F5F5"
-                        text battle_message size 20 color "#F5F5F5"
-
-                frame:
-                    xsize 600
-                    background "#151515cc"
-                    padding (20, 18)
-
-                    vbox:
-                        spacing 12
-                        text f"Inventori {owner_display_name('player')}" size 24 color "#F5F5F5"
-                        grid 3 1:
-                            spacing 10
-                            for slot_index in range(MAX_ITEM_SLOTS):
-                                $ slot_label = inventory_slot_label("player", slot_index)
-                                textbutton slot_label:
-                                    xsize 170
-                                    ysize 62
-                                    sensitive slot_label != "Kosong"
-                                    action Return(("item", slot_index))
+                        for slot_index in range(MAX_ITEM_SLOTS):
+                            $ slot_label = inventory_slot_label("player", slot_index)
+                            textbutton slot_label:
+                                xsize 180 ysize 60
+                                text_size 18
+                                text_color "#888"
+                                sensitive slot_label != "Kosong"
+                                background "#181818"
+                                hover_background "#2a1010"
+                                selected_background "#2a1010"
+                                action Return(("item", slot_index))
 
             hbox:
-                spacing 18
+                spacing 30
                 xalign 0.5
 
-                textbutton "Tembak Lawan":
-                    xsize 240
-                    ysize 70
-                    text_size 24
+                textbutton "TEMBAK LAWAN":
+                    xsize 300 ysize 78
+                    text_size 24 text_color "#cc1a1a" text_bold True
+                    background "#1a0505"
+                    hover_background "#3a0a0a"
                     action Return("shoot_dealer")
 
-                textbutton "Tembak Diri Sendiri":
-                    xsize 240
-                    ysize 70
-                    text_size 24
+                textbutton "TEMBAK DIRI":
+                    xsize 200 ysize 60
+                    text_size 16 text_color "#555"
+                    background "#0d0d0d"
+                    hover_background "#1a1a1a"
                     action Return("shoot_self")
 
 
@@ -413,9 +436,7 @@ label start:
     "Tempat Kejadian Perkara - Pagi Hari"
     ""
     ar "Pak, saya telah mengumpulkan bukti untuk kasus pembunuhan ini. Ada dua benda yang sangat penting di sini."
-    ""
     kp "Dua bukti? Tunjukkan aku, Pendelton."
-    ""
     ar "Bukti pertama: Pisau dengan fingerprint yang jelas. Analisis forensik menunjukkan fingerprint ini berasal dari anggota Mafia Russo. Pisau ini adalah senjata utama dalam pembunuhan korban."
     ""
     "Arthur menunjukkan pisau dengan hati-hati, setiap detail terbaca di matanya."
@@ -425,9 +446,7 @@ label start:
     "Arthur menunjukkan peluru dengan percaya diri."
     ""
     kp "Dua bukti yang menarik, Pendelton. Mana yang akan kamu pilih untuk laporan resmi? Kedua-duanya memiliki arti penting, tapi biasanya satu bukti yang menjadi fokus utama investigasi."
-    ""
     ar "Itu keputusan saya, Pak. Mana yang menurut Anda lebih kuat?"
-    ""
     kp "Keputusan itu ada di tanganmu. Pilih dengan bijak."
 
     menu:
@@ -454,11 +473,8 @@ label hospital_scene:
     "Tabitha sedang merapihkan mainan anak-anak di ruang perawatan pediatrik dengan tangan yang lembut."
     ""
     child "Mbak Tabitha! Mbak Tabitha! Mau main apa?"
-    ""
     ta "Halo sayang. Gimana kabarmu? Baik-baik saja?"
-    ""
     child "Baik! Aku bosan. Mau main. Sesuatu yang menyenangkan!"
-    ""
     ta "Baik baik. Kita punya dua pilihan. Kita bisa merakit puzzle besar, atau membuat origami yang keren. Kamu mau yang mana?"
 
     menu:
@@ -475,9 +491,7 @@ label hospital_scene:
             "Tabitha melipat kertas dengan hati-hati, mengajari anak kecil itu cara membuat sayap. Akhirnya mereka ciptakan burung origami yang cantik. Anak itu berlari-lari di sekitar ruangan, membuat burung itu 'terbang'."
 
     ta "Lihat? Kamu sudah bisa bikin mainanmu sendiri. Kamu sangat hebat."
-    ""
     child "Mbak Tabitha baik. Mbak Tabitha sayang sama aku."
-    ""
     ta "Iya sayang. Aku sayang sama kamu. Jangan pernah lupa itu, ya?"
 
     jump gossip_scene
@@ -491,15 +505,10 @@ label gossip_scene:
     "Tiga perawat, Amelia, Clara, dan Elena, berkumpul di ruang istirahat sambil membuat kopi."
     ""
     am "Duh, lihat Tabitha tadi? Segala sesuatu dia selesaikan sendiri, seolah-olah kita semua tidak berguna."
-    ""
     cl "Iya! Dia kasar sekali kalau bicara. Pas aku minta bantuan kemarin, dia malah bentakin aku."
-    ""
     el "Kalian tau ngga? Dia kalo main bareng anak-anak kelihatannya baik banget, tapi kalo di belakang jahat sebenernya."
-    ""
-    am "Exactly! Perilaku twoface banget. Seperti dia punya dua wajah."
-    ""
-    cl "Mungkin kita harus laporin dia ke manager? Perilakunya benar-benar merugikan lingkungan kerja."
-    ""
+    am "Exactly! Sepertinya dia punya dua wajah."
+    cl "Kita harus laporin dia ke manager. Kelakuannya benar-benar sering ganggu."
     el "Iya setuju. Manager perlu tahu bahwa Tabitha ini toxic untuk tim kita."
 
     "Ketiga wanita itu tersenyum jahat, merencanakan bagaimana cara melapor dengan paling efektif."
@@ -515,22 +524,16 @@ label manager_office_scene:
     ""
     "Manajer Rumah Sakit duduk di meja kerjanya, mengeluh dalam hati tentang pekerjaan yang menumpuk. Berkas-berkas bertumpuk di meja, jadwal shift yang berantakan, dan keluhan dari berbagai departemen."
     ""
-    mr "Tuhan... kenapa semuanya jadi masalah di hari ini? Apa tidak ada yang bisa berjalan lancar?"
+    mr "Tuhan... kenapa banyak banget masalah di hari ini? Kerjanya pada gimana sih?"
 
     "Pintu terbuka. Amelia, Clara, dan Elena masuk dengan ekspresi yang serius dan berpura-pura khawatir."
     ""
     am "Manager, bisa kami bicara sebentar?"
-    ""
     mr "Apa lagi? Cepatlah, aku punya banyak pekerjaan."
-    ""
-    cl "Ini tentang Tabitha Vane. Kami ingin melaporkan perilakunya yang tidak layak."
-    ""
+    cl "Ini tentang Tabitha Vane. Kami ingin melaporkan tentang perilakunya yang tidak layak."
     el "Dia sangat kasar terhadap kami. Dia memperlakukan kami dengan tidak hormat."
-    ""
     mr "Kasar? Berapa banyak orang yang sudah melapor?"
-    ""
     am "Kami bertiga. Dan kami yakin ada juga orang lain yang merasa hal yang sama."
-    ""
     mr "Baiklah... baiklah. Ini adalah laporan resmi. Terima kasih atas informasinya."
 
     "Ketiga wanita itu pergi dengan senyuman yang puas, sementara manager menghela napas berat."
@@ -545,23 +548,15 @@ label firing_scene:
     "Tabitha sedang merapihkan mainan terakhir ketika manager datang dengan wajah serius."
     ""
     mr "Tabitha, kita perlu bicara. Sekarang."
-    ""
     ta "Ada apa, Manager? Apa ada masalah?"
-    ""
     mr "Masalah? Iya, ada. Ada tiga laporan masuk tentang perilakumu yang tidak profesional. Banyak yang mengatakan kamu kasar dan tidak menghormati rekan kerja."
-    ""
     ta "Apa? Itu tidak benar. Siapa yang bilang? Aku tidak pernah kasar kepada siapa pun."
-    ""
     mr "Kamu menolak laporan ini? Mereka bertiga sudah datang dan melaporkan hal yang sama. Kamu pikir mereka semua bohong?"
-    ""
     ta "Tidak, aku hanya... mereka mengada-ada. Aku tidak pernah melakukan apa yang mereka katakan!"
-    ""
     mr "Kamu terus denial, Tabitha. Lihat, hari ini saja aku sudah kelelahan mendengarkan komplen. Dan sekarang kamu menambah masalah. Aku tidak punya energi untuk ini."
-    ""
     mr "Cukup! Cukup! Aku tidak mau mendengar alibi lagi. Banyak laporan masuk ke saya. Kamu ngeraguin saya? Cukup bekerja sesuai aturan atau pergi. Ambil barangmu dan keluar dari sini sebelum aku memutuskan untuk mem-PHK mu sekarang juga!"
 
     ta "Ini tidak adil..."
-    ""
     mr "Adil? Adil itu ketika tim bisa bekerja tanpa ketakutan dengan rekan kerja mereka. Sekarang pergi."
 
     "Tabitha terdiam. Emosi campur aduk. Dia merasa difitnah, direndahkan, dan tidak dihargai."
@@ -573,14 +568,11 @@ label tabitha_leaving_hospital:
     scene bg_loker_rumah_sakit with fade
     stop music fadeout 2.0
     "Tabitha berjalan ke loker untuk mengambil barang pribadi. Tangan nya gemetar karena kemarahan."
-    ""
     ta "Aku tidak layak mendapat perlakuan ini... Mereka bohong. Semua bohong!"
-    ""
     "Dia mengemas tasnya dengan kasar, menutup loker dengan pukulan ringan."
-    ""
-    ta "Pergi dari rumah sakit ini. Tidak ada tempat untuk orang seperti aku di sini."
+    ta "Aku akan pergi dari rumah sakit ini. Aku memberikan yang terbaik pun orang tidak bisa menghargai perbuatanku."
 
-    "Tabitha berjalan keluar dari rumah sakit dengan wajah merah dan mata yang berapi-api. Dendam dan kecewa mulai berkembang di hati."
+    "Tabitha berjalan keluar dari rumah sakit dengan wajah kesal dan penuh amarah. Rasa dendam dan kecewa muncul di hati Tabitha."
 
     jump arthur_police_station
 
@@ -592,31 +584,22 @@ label arthur_police_station:
     ""
     "Arthur datang untuk menanyakan hasil penyelidikan kasusnya. Dia masuk ke ruang kepala polisi dengan kepercayaan diri."
     ""
-    ar "Pak, saya ingin mengetahui perkembangan kasus pembunuhan itu. Sudah diaresto?"
-    ""
+    ar "Pak, saya ingin mengetahui perkembangan kasus pembunuhan itu. Gimana kelanjutannya?"
     kp "Pendelton... duduk."
-    ""
     ar "Ada apa? Mereka sudah ditangkap?"
-    ""
     kp "Tidak. Mereka tidak akan ditangkap. Kasus ini ditutup."
-    ""
     ar "Ditutup? Bagaimana bisa? Ada bukti! Ada jenazah! Ada hukum!"
-    ""
-    kp "Ya, ada semua itu. Tapi ada juga donasi. Ada juga kontribusi. Ada juga kepentingan lebih besar dari satu kasus pembunuhan."
-    ""
-    ar "Jadi Anda bilang hukum bisa diabaikan jika ada uang yang cukup? Itulah kepolisian sekarang?"
-    ""
-    kp "Pendelton, ini bukan dunia hitam putih. Ada nuansa grey yang harus dipahami."
-    ""
-    ar "Tidak. Ini hitam putih. Pembunuh harus dipenjara. Titik. Tidak ada nuansa disini."
-    ""
-    kp "Kamu terus memperdebatkan ini tanpa mengerti situasi politis. Aku tidak butuh detektif yang tidak bisa bekerja dalam sistem. Lencana mu, ambil dari atas mejaku. Kamu dipecat. Selesai."
+    kp "Ya, semua bukti memang sudah jelas. Tapi mereka adalah donatur utama bagi kami. Kamu tahu kan gaji kami hanya cukup untuk kebutuhan sehari-hari?. Jika kasus ini dilanjutkan itu akan berbahaya bagi instansi kedepannya."
+    ar "Jadi Anda bilang kasus pembunuhan ini bisa ditutup dengan uang? Seperti ini ya ternyata kepolisian sekarang."
+    kp "Pendelton... dunia ini tidak selamanya hitam putih."
+    ar "Tidak. Ini hitam putih. Pembunuh harus dipenjara. Titik. Tidak ada alasan yang bisa menutup kasus ini."
+    kp "Kamu terus memperdebatkan ini tanpa mengerti situasi politis. Aku tidak butuh detektif yang tidak bisa bekerja dalam sistem. Taruh seragam kamu di mejaku. Kamu dipecat. Selesai."
 
     "Arthur terdiam sejenak, kemudian tiba-tiba berdiri dan meneriaki seluruh kantor."
     ""
-    ar "Kalian semua busuk! Korup! Tidak pantas menjadi penjaga hukum! Kalian adalah pencuri berseragam!"
+    ar "Kalian semua busuk! Korup! Tidak pantas menjadi penjaga hukum! Kalian semua PEMBUNUH!"
 
-    "Arthur meninggalkan kantor dengan marah, menutup pintu keras-keras."
+    "Arthur meninggalkan kantor dengan marah, ia pun membanting pintu keras-keras."
 
     jump tabitha_arrives_home
 
@@ -626,11 +609,11 @@ label tabitha_arrives_home:
     play music "audio/destruction.mp3" fadein 1.0
     "Rumah Arthur dan Tabitha - Malam Hari"
     ""
-    "Tabitha tiba di rumah duluan. Dia berjalan ke depan rumah dengan pikiran yang masih kalut dari pengalaman di rumah sakit."
+    "Tabitha tiba di rumah duluan. Dia berjalan ke depan rumah dengan pikiran yang berantakan akibat dari pengalaman di rumah sakit."
     ""
-    ta "Akhirnya pulang. Rumah adalah tempat yang aman... atau seharusnya begitu."
+    ta "Akhirnya pulang. Rumah adalah satu-satunya tempat yang tidak pernah berkhianat."
     ""
-    "Tiba-tiba matanya melihat sesuatu yang mengerikan. Kotoran anjing bertebaran di depan rumah. Dan di jendela..."
+    "Tiba-tiba matanya melihat sesuatu yang mengejutkan. Kotoran anjing bertebaran di depan rumah. Dan di jendela..."
     ""
     ta "..."
     ""
@@ -640,9 +623,9 @@ label tabitha_arrives_home:
     ""
     "Tabitha merasa semua emosi meledak sekaligus. Pengkhianatan di rumah sakit, pengasingan, ketidakadilan... dan sekarang ini. Karena mereka. Amelia, Clara, Elena."
     ""
-    ta "MEREKA!!! MEREKA YANG LAKUKAN INI!!!"
+    ta "MEREKA!!! PASTI MEREKA YANG LAKUKAN INI SEMUA!!!"
 
-    "Tabitha berlari masuk ke rumah dengan marah yang sudah tidak bisa dikontrol."
+    "Tabitha berlari masuk ke rumah dengan amarah yang tidak terkontrol."
 
     jump house_destruction
 
@@ -662,31 +645,25 @@ label house_destruction:
 
 label arthur_arrives_home:
     scene bg_rumah with fade
-    "Sekitar 5 menit kemudian, Arthur tiba di rumah. Dia sudah tahu sesuatu salah ketika melihat pintu terbuka dan kotoran anjing di depan jendela."
+    "Sekitar 5 menit kemudian, Arthur tiba di rumah. Dia menyadari ada sesuatu yang janggal ketika melihat pintu terbuka dan banyak kotoran anjing di depan jendela."
     ""
     ar "Apa yang...?"
     ""
     "Arthur berlari masuk dan melihat rumah yang berantakan."
     ""
-    ar "Tabitha! Apa yang terjadi?! Kenapa rumah berantakan?!"
-    ""
+    ar "Tabitha! Apa yang terjadi?! Kenapa seisi rumah berantakan?!"
     ta "..."
     ""
     "Tabitha masih duduk di lantai, melihat Arthur dengan mata yang penuh dendam dan kecewa."
     ""
     ar "Jawab aku! Ada kotoran di depan, jendela dicorat-coret, dan sekarang rumah ancur! APA YANG TERJADI?!"
-    ""
-    ta "Dunia ini isinya orang-orang jahat! Mereka fitnah aku! Mereka tulis hal kejam di rumah kita! Dan apa yang kamu lakukan?!"
-    ""
-    ar "Aku? AKU BARU SAJA DIPECAT KARENA AKU MENCOBA MELAKUKAN YANG BENAR! Lalu aku pulang dan melihat ini! Semuanya hancur!"
-    ""
+    ta "Dunia ini isinya orang-orang jahat! Mereka fitnah aku! Mereka mengotori rumah kita!"
+    ar "BUKAN CUMAN KAMU YANG BISA MARAH-MARAH AKU BARU SAJA DIPECAT KARENA AKU MENCOBA MELAKUKAN YANG BENAR! Lalu aku pulang dan melihat ini! Semuanya hancur!"
     ta "Semuanya memang seharusnya hancur! Dunia ini tidak layak untuk dipertahankan!"
-    ""
-    ar "Jangan bilang aku tentang dunia! Aku tahu dunia itu kasar! Tapi kita harus bertahan, Tabitha!"
-    ""
+    ar "Aku tahu dunia itu kasar! Tapi kita harus bertahan, Tabitha!"
     ta "Bertahan? UNTUK APA?! Untuk apa bertahan jika semua orang akan mengkhianati kita?!"
     ""
-    "Mereka saling berteriak, mencari siapa yang paling bersalah, siapa yang paling menderita. Debat yang tidak ada akhir tentang dunia yang kejam dan hati yang rusak."
+    "Mereka saling berteriak. Debat yang tidak ada akhir tentang dunia yang kejam dan hati yang rusak."
 
     jump roulette_proposal
 
@@ -694,67 +671,61 @@ label arthur_arrives_home:
 label roulette_proposal:
     scene bg_ruang_tamu with fade
     play music "audio/roulette.mp3" fadein 1.0
-    "Berjam-jam mereka saling berteriak. Menyalahkan. Menghujat. Hancur."
+    "Berjam-jam mereka saling berteriak. Menyalahkan. Hancur."
     ""
-    "Sekarang, hanya ada kelelahan yang menggerogoti tulang."
+    "Sekarang, hanya ada kelelahan yang terjadi diantara mereka berdua."
     ""
     ar "Kita tidak bisa lanjut seperti ini."
-    ""
     ta "Aku tahu."
     ""
-    "Diam panjang. Hanya jam dinding yang berdetak, menghitung mundur sesuatu yang tidak bisa mereka hindari."
+    "Dunia mendadak sunyi. Hanya jam dinding yang berdetak dan suara angin yang berhembus di luar yang terdengar. Mereka saling menatap, mencari jawaban satu sama lain."
     ""
-    ar "Setiap hari kita saling menyakiti. Setiap hari sama saja."
-    ""
+    ar "Setiap hari dunia ini semakin sakit. Setiap hari sama saja."
     ta "Iya."
-    ""
     ar "Mungkin kita perlu cara lain untuk mengakhiri ini. Cara yang jujur. Cara yang final."
-    ""
     ta "Apa maksudmu?"
     ""
-    "Arthur menatap Tabitha. Bukan dengan cinta. Bukan dengan benci. Tapi dengan sesuatu yang jauh lebih gelap—penerimaan."
+    "Arthur menatap Tabitha. Bukan dengan cinta. Bukan dengan benci. Tapi dengan sesuatu yang jauh lebih gelap..."
     ""
     ar "Roulette."
     ""
-    "Kata itu menggantung di udara. Berat. Tidak bisa ditarik kembali."
+    "Kata itu bergema di kepala mereka. Berat. Tidak bisa ditarik kembali."
     ""
     ta "..."
-    ""
     ta "Baik."
     ""
     "Mereka berjalan ke lemari tua di sudut ruangan. Dari dalam, Arthur mengeluarkan sebuah revolver perak yang sudah lama disimpan."
-    "Revolver yang sudah mereka persiapkan sejak lama. Untuk situasi seperti ini."
-    "Atau mungkin, revolvers inilah satu-satunya alasan mereka bertahan sejauh ini."
+    "Revolver yang sudah mereka simpan sejak lama."
     ""
-    "Sebuah keputusan yang final. Sebuah permainan yang tidak ada pemenang sejati."
+    "Sebuah keputusan yang final. Sebuah permainan yang tidak ada pemenang."
 
     jump character_selection
 
 
 label character_selection:
     scene bg_ruang_tamu with fade
-    "Di tengah ruangan yang berantakan, di antara pecahan kaca dan kenangan yang hancur, mereka berdiri saling berhadapan."
+    "Di tengah ruangan yang berantakan, di antara pecahan kaca dan isi ruangan yang hancur, mereka berdiri saling berhadapan."
     "Revolver di tangan. Takdir di ujung laras."
     ""
     "Satu pertanyaan terakhir. Satu keputusan yang akan menentukan segalanya."
     ""
     "Siapa yang akan memegang kendali?"
     "Siapa yang akan menarik pelatuk pertama?"
-    "Siapa yang akan menjadi algojo—dan siapa yang akan menjadi korban?"
+    "Dan siapa yang akan menjadi korban di malam ini?"
     ""
 
     menu:
         "Arthur Pendelton — Detektif":
             $ player_character = "arthur"
-            "Arthur melangkah maju. Wajahnya keras, tapi matanya—matanya kosong."
+            "Arthur menarik nafas dalam-dalam. Tatapannya kosong."
             ar "Baik. Aku yang mulai."
         
         "Tabitha Vane — Perawat":
             $ player_character = "tabitha"
-            "Tabitha mengambil revolver dari tangan Arthur. Jari-jarinya melingkar di gagangnya dengan familiaritas yang mengerikan."
+            "Tabitha mengambil revolver. Jari-jarinya melingkar dengan ekspresi yang datar."
             ta "Baik. Aku yang mulai."
 
-    "Tirai telah dibuka. Pertunjukan paling kelam dalam hidup mereka akan segera dimulai."
+    "Permainan paling kelam dalam hidup mereka akan segera dimulai."
 
     jump secret_chest_preparation
 
@@ -763,7 +734,7 @@ label secret_chest_preparation:
     scene bg_ruang_tamu with fade
     "Arthur membuka sebuah peti kayu tua di sudut ruangan. Engselnya berderit, seperti suara terakhir seseorang sebelum mati."
     ""
-    "Di dalamnya, tiga kotak misterius tersusun rapi. Masing-masing berisi benda yang bisa menjadi penyelamat—atau penunda kematian."
+    "Di dalamnya, ada kotak misterius tersusun rapi. Berisi benda yang bisa menjadi penolong—atau penunda kematian."
     ""
     $ player_items = []
     $ dealer_items = []
@@ -776,7 +747,7 @@ label secret_chest_preparation:
         "Suara Tabitha tenang. Terlalu tenang."
         ar "Kau duluan."
 
-    "Mari kita lihat apa yang menunggu di dalam peti ini..."
+    "Mari kita lihat apa yang ada di dalam peti ini..."
 
     jump player_draws_items
 
@@ -828,7 +799,6 @@ label dealer_draws_items:
             ta "[ITEM_NAMES[item3]]. Kau pasti suka kalau aku pakai ini nanti."
         else:
             ta "Habis."
-        ""
         ta "Dan satu lagi."
         $ item4 = draw_item_for("dealer")
         if item4 is not None:
@@ -844,7 +814,6 @@ label dealer_draws_items:
             ar "[ITEM_NAMES[item3]]. Ini cukup untuk membuatmu berpikir dua kali."
         else:
             ar "Habis."
-        ""
         ar "Satu lagi."
         $ item4 = draw_item_for("dealer")
         if item4 is not None:
@@ -990,155 +959,37 @@ label ending_player_wins:
     scene bg black with fade
     
     if player_character == "arthur":
-        "Tabitha terjatuh. Tubuhnya yang mungil bergerak lemah di lantai kayu yang dingin."
-        "Revolver di tangan Arthur masih mengeluarkan asap tipis."
-        ""
-        "Dia menatap wanita di depannya. Tabitha—yang pernah menjadi istrinya."
-        ""
-        "Dunia tiba-tiba terasa begitu sunyi."
-        ""
-        ta "Arthur..."
-        "Suara Tabitha hampir tidak terdengar. Seperti bisikan dari dunia lain."
-        ""
-        ta "Kau tahu... di antara semua orang... kau satu-satunya yang membuatku merasa hidup."
-        "Dia tersenyum. Senyum yang sakit. Senyum yang hancur."
-        ""
-        ta "Atau mungkin... mati."
-        ""
-        "Tangannya jatuh. Matanya kosong menatap langit-langit."
-        ""
-        "Arthur berdiri di tengah keheningan. Sendirian. Dengan revolver yang masih hangat di genggaman."
-        ""
-        "Dunia tidak pernah adil. Tapi kenyataan tidak pernah meminta persetujuan."
-        "Dia mengangkat revolver. Perlahan. Pasti."
-        "Ke pelipisnya sendiri."
-        ""
-        "Mungkin, di dunia yang lebih baik, mereka bisa saling mencintai tanpa harus saling membunuh."
-        ""
-        "Tapi dunia ini bukan tempat untuk orang baik."
-        ""
-        "BANG."
-        scene black with fade
+        "Tabitha jatuh. Darah menggenang di lantai."
+        jump ending_tabitha_dies
     else:
-        "Arthur terjatuh. Tubuhnya yang besar ambruk dengan suara berat."
-        "Tabitha berdiri gemetar. Revolver di tangannya terasa begitu berat."
-        ""
-        "Dia menatap pria yang dulu pernah dia percaya. Yang dulu pernah dia cintai."
-        ""
-        ar "Tabitha..."
-        "Arthur tersenyum. Darah mengalir dari sudut bibirnya."
-        ""
-        ar "Kau hebat... kau benar-benar..."
-        "Napasnya terhenti."
-        ""
-        "Tabitha menjerit. Bukan karena kemenangan. Bukan karena kegembiraan."
-        "Jeritan seorang wanita yang kehilangan satu-satunya orang yang tersisa di dunia yang kejam ini."
-        ""
-        "Dengan mata kosong dan tangan berlumuran darah, dia melangkah keluar dari rumah."
-        "Masih ada tiga orang yang harus dikunjungi."
-        "Amelia. Clara. Elena."
-        "Dendam adalah satu-satunya alasan dia masih bernapas."
-        scene black with fade
-
-    jump ending_credits
+        "Arthur jatuh. Darah menggenang di lantai."
+        jump ending_arthur_dies
 
 
 label ending_player_loses:
     scene bg black with fade
     
     if player_character == "arthur":
-        "Arthur terjatuh. Darah mulai menggenang di sekitar tubuhnya."
-        "Tabitha berdiri, revolver masih di tangan. Asap tipis keluar dari larasnya."
-        ""
-        "Dia menatap suaminya yang tergeletak. Hening."
-        ""
-        ta "Kau selalu berusaha menyelamatkan orang, Arthur. Bahkan saat kau sendiri yang perlu diselamatkan."
-        "Suaranya bergetar. Bukan karena tangis. Tapi karena sesuatu yang lebih kelam."
-        ""
-        ta "Sekarang, siapa yang akan menyelamatkan aku?"
-        ""
-        "Dia berbalik. Langkahnya meninggalkan rumah, meninggalkan mayat, meninggalkan masa lalu."
-        "Di luar, tiga nama terukir di pikirannya."
-        "Amelia. Clara. Elena."
-        "Dunia ini akan merasakan apa yang dia rasakan."
-        scene black with fade
+        "Arthur jatuh. Darah menggenang di lantai."
+        jump ending_arthur_dies
     else:
-        "Tabitha jatuh. Tubuhnya mendarat dengan bunyi yang menghancurkan jiwa."
-        "Arthur berdiri diam. Menatap wanita yang dulu dia kenal."
-        ""
-        "Dia mondar-mandir. Tangannya memegang kepala. Rambutnya kusut."
-        ""
-        ar "Tidak... tidak, tidak, tidak..."
-        "Dia berhenti. Menatap revolver di tangannya."
-        ""
-        ar "Aku gagal. Lagi. Lagi. LAGI."
-        "Dengan gerakan yang tiba-tiba tenang, dia mengangkat revolver."
-        ""
-        ar "Aku datang, Tabitha."
-        ""
-        "BANG."
-        scene black with fade
-
-    jump ending_credits
+        "Tabitha jatuh. Darah menggenang di lantai."
+        jump ending_tabitha_dies
 
 
 label ending_player_self_shot:
     scene bg black with fade
     
     if player_character == "arthur":
-        "Arthur mengarahkan laras revolver ke pelipisnya sendiri."
-        "Tidak ada keraguan di matanya. Hanya kehampaan yang dalam."
-        "Jarinya bergerak."
-        ""
+        "Arthur menekan laras ke pelipisnya."
         "BANG."
-        ""
-        "Suara letusan memenuhi ruangan. Tubuh Arthur ambruk. Darah mulai mengalir, membasahi lantai kayu yang tadinya bersih."
-        "Matanya masih terbuka. Menatap langit-langit yang retak."
-        ""
-        "Keheningan yang mencekik."
-        ""
-        ta "ARTHUR!"
-        "Tabitha menjatuhkan diri di samping tubuh Arthur. Tangannya meraba-raba mencari denyut nadi."
-        "Tidak ada."
-        ""
-        ta "Tidak... tidak... kau tidak bisa... kau tidak boleh..."
-        "Gemetar. Air mata mulai jatuh. Tapi bukan air mata kesedihan—melainkan air mata kemarahan."
-        ""
-        ta "KAUBIARKAN AKU SENDIRIAN?! KAU TINGGALKAN AKU DI DUNIA INI? SENDIRIAN?!"
-        "Dia memukul lantai. Berulang kali. Sampai buku jarinya memar dan berdarah."
-        ""
-        "Dengan napas yang tidak beraturan, Tabitha bangkit. Darah Arthur masih menempel di tangannya."
-        "Tanpa sepatah kata, dia berjalan keluar dari rumah itu."
-        "Ada tiga nama yang harus dia kunjungi."
-        "Ada banyak nyawa yang harus dibayar."
-        scene black with fade
+        "Tubuhnya roboh."
+        jump ending_arthur_dies
     else:
-        "Tabitha menekan laras revolver ke pelipisnya. Tangannya tidak gemetar."
-        "Matanya kosong. Jiwanya sudah pergi lebih dulu sebelum peluru meninggalkan ruang silinder."
-        ""
+        "Tabitha menekan laras ke pelipisnya."
         "BANG."
-        ""
-        "Tubuhnya roboh. Genangan darah perlahan meluas di lantai."
-        "Wajahnya tetap tenang. Seolah-olah kematian adalah teman lama yang sudah ditunggu."
-        ""
-        "Arthur berlari. Tersandung. Jatuh. Merangkak ke samping tubuh Tabitha."
-        ""
-        ar "TABITHA! BUKA MATAMU! LIHAT AKU!"
-        "Dia mengguncang tubuh yang sudah tidak bernyawa itu."
-        ""
-        ar "KAU... KAU BODOH! KAU TIDAK PUNYA HAK UNTUK PERGI!"
-        "Tangisnya pecah. Pria yang selama ini kuat, akhirnya runtuh."
-        ""
-        "Berjam-jam dia duduk di sana. Memegang tangan Tabitha yang sudah dingin."
-        "Revolver tergeletak di sampingnya."
-        ""
-        "Dia mengambilnya. Menatapnya lama."
-        "Lalu, diam-diam, dia bangkit dan berjalan keluar."
-        "Bukan untuk mati."
-        "Tapi untuk membalaskan dendam yang bahkan dia sendiri tidak yakin milik siapa."
-        scene black with fade
-
-    jump ending_credits
+        "Tubuhnya roboh."
+        jump ending_tabitha_dies
 
 
 label shield_saved_self_shot:
@@ -1146,21 +997,15 @@ label shield_saved_self_shot:
     
     if player_character == "arthur":
         "Arthur mengarahkan revolver ke pelipisnya."
-        ""
         "BANG!"
-        ""
-        "Peluru berhenti. Shield-nya menyala. Arthur selamat."
-        ""
+        "Shield-nya menyala. Peluru berhenti."
         ta "Arthur!"
-        ta "Kau... masih hidup."
+        ta "Kau masih hidup."
         ta "Giliranku."
     else:
         "Tabitha mengarahkan revolver ke pelipisnya."
-        ""
         "BANG!"
-        ""
-        "Peluru berhenti. Shield-nya menyala. Tabitha selamat."
-        ""
+        "Shield-nya menyala. Peluru berhenti."
         ar "Tabitha!"
         ar "Kau baik-baik saja?"
         ar "Giliranku."
@@ -1169,46 +1014,61 @@ label shield_saved_self_shot:
     jump player_to_dealer_transition
 
 
+label ending_arthur_dies:
+    "Arthur—satu-satunya manusia yang pernah masuk ke dalam hidup Tabitha—telah pergi."
+    "..."
+    "Tabitha memandang tangannya. Darah masih hangat."
+    "Ia tidak menangis. Dunia sudah mengajarinya bahwa air mata tidak pernah menolong siapa pun."
+    "..."
+    "Dia berjalan keluar dari rumah."
+    "Malam ini, tiga orang akan mati."
+    "Amelia, Clara, Elena."
+    "Masing-masing dengan cara yang berbeda."
+    "..."
+    "Dunia akan menjadi saksi."
+    scene black with fade
+    jump ending_credits
+
+
+label ending_tabitha_dies:
+    "Tabitha—satu-satunya yang berhasil menembus tembok dingin Arthur—telah pergi."
+    "..."
+    "Arthur duduk di sampingnya. Diam."
+    "Sepanjang hidupnya, tidak ada yang pernah benar-benar berarti."
+    "Tabitha adalah satu-satunya."
+    "Dan sekarang ia pergi."
+    "..."
+    "Diam-diam, Arthur mengambil revolver."
+    "BANG."
+    scene black with fade
+    jump ending_credits
+
+
 label ending_draw:
     scene bg black with fade
     
     if player_character == "arthur":
         ar "Kehabisan peluru."
         ta "Kehabisan peluru."
-        ar "Tapi kemarahan tidak habis."
-        ta "Tidak habis."
-        ""
-        "Mereka berdua berdiri, mata merah, berkeringat, dan luka."
-        ""
-        ar "Kita muat lagi."
-        ta "Kita muat lagi."
-        ""
-        "Mereka mengambil dua revolver baru. Menodongkan ke kepala satu sama lain. Tersenyum gila, dalam cinta yang rusak dan pengkhianatan yang saling bertoleransi."
-        ""
-        ar "Bersamaan?"
-        ta "Bersamaan."
-        ""
-        "Dua pelatuk ditarik dalam harmoni yang mengerikan."
-        scene black with fade
     else:
         ta "Kehabisan peluru."
         ar "Kehabisan peluru."
-        ta "Tapi kemarahan tidak habis."
-        ar "Tidak habis."
-        ""
-        "Mereka berdua berdiri, mata merah, berkeringat, dan luka."
-        ""
-        ta "Kita muat lagi."
-        ar "Kita muat lagi."
-        ""
-        "Mereka mengambil dua revolver baru. Menodongkan ke kepala satu sama lain. Tersenyum gila, dalam cinta yang rusak dan pengkhianatan yang saling bertoleransi."
-        ""
+    
+    "..."
+    "Mereka saling memandang. Marah. Frustrasi."
+    "Tidak ada yang menang. Tidak ada yang kalah."
+    "..."
+    "Mereka mengambil revolver lain. Mengisi penuh amunisi."
+    "Menodongkan ke satu sama lain."
+    "..."
+    if player_character == "arthur":
+        ar "Bersamaan?"
+        ta "Bersamaan."
+    else:
         ta "Bersamaan?"
         ar "Bersamaan."
-        ""
-        "Dua pelatuk ditarik dalam harmoni yang mengerikan."
-        scene black with fade
-
+    "Dua pelatuk ditarik."
+    scene black with fade
     jump ending_credits
 
 
