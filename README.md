@@ -21,3 +21,7 @@ This repository ignores generated Ren'Py outputs, local save data, logs, and mac
 1. Open the project in Ren'Py.
 2. Launch the game from the Ren'Py launcher.
 3. Edit the script files under `game/` to continue development.
+
+## Where to access?
+
+**https://zwaneee.itch.io/the-love-roulette**
