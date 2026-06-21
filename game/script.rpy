@@ -1,14 +1,33 @@
 # The Love Roulette - Full Narrative & Battle System
 
 # Character declarations with natural colors
-define ar = Character("Arthur Pendelton", color="#4A90E2")
-define ta = Character("Tabitha Vane", color="#D0021B")
-define kp = Character("Kepala Polisi", color="#9B9B9B")
-define mr = Character("Manajer Rumah Sakit", color="#7ED321")
-define am = Character("Amelia", color="#F5A623")
-define cl = Character("Clara", color="#BD10E0")
-define el = Character("Elena", color="#9013FE")
-define child = Character("Anak Kecil", color="#FFB6C1")
+define ar = Character("Arthur Pendelton", color="#4A90E2",
+    side_image = "images/characters/arthur.png")
+define ta = Character("Tabitha Vane", color="#D0021B",
+    side_image = "images/characters/tabitha.png")
+define kp = Character("Kepala Polisi", color="#9B9B9B",
+    side_image = "images/characters/polisi.png")
+define mr = Character("Manajer Rumah Sakit", color="#7ED321",
+    side_image = "images/characters/manager.png")
+define am = Character("Amelia", color="#F5A623",
+    side_image = "images/characters/Amelia.png")
+define cl = Character("Clara", color="#BD10E0",
+    side_image = "images/characters/Clara.png")
+define el = Character("Elena", color="#9013FE",
+    side_image = "images/characters/Elena.png")
+define child = Character("Anak Kecil", color="#FFB6C1",
+    side_image = "images/characters/anak.png")
+
+# Fullscreen background definitions
+image bg_investigasi = Transform("images/bg_investigasi.jpg", xsize=1280, ysize=720, fit="cover")
+image bg_anak_rumah_sakit = Transform("images/bg_anak_rumah_sakit.jpg", xsize=1280, ysize=720, fit="cover")
+image bg_gosip_rumah_sakit = Transform("images/bg_gosip_rumah_sakit.jpg", xsize=1280, ysize=720, fit="cover")
+image bg_ruang_manager = Transform("images/bg_ruang_manager.jpg", xsize=1280, ysize=720, fit="cover")
+image bg_loker_rumah_sakit = Transform("images/bg_loker_rumah_sakit.jpg", xsize=1280, ysize=720, fit="cover")
+image bg_kantor_polisi = Transform("images/bg_kantor_polisi.jpg", xsize=1280, ysize=720, fit="cover")
+image bg_rumah = Transform("images/bg_rumah.jpg", xsize=1280, ysize=720, fit="cover")
+image bg_berantakan = Transform("images/bg_berantakan.jpg", xsize=1280, ysize=720, fit="cover")
+image bg_ruang_tamu = Transform("images/bg_ruang_tamu.jpg", xsize=1280, ysize=720, fit="cover")
 
 
 init python:
@@ -16,6 +35,11 @@ init python:
 
     MAX_ITEM_SLOTS = 3
     ITEM_POOL = ["pil_kebal", "borgol", "serpihan_kaca"]
+    ITEM_WEIGHTS = {
+        "pil_kebal": 15,
+        "serpihan_kaca": 35,
+        "borgol": 50,
+    }
     ITEM_NAMES = {
         "pil_kebal": "Pil Kebal",
         "borgol": "Borgol",
@@ -43,8 +67,12 @@ init python:
 
     battle_message = ""
     turn_owner = "player"
+    previous_turn = "dealer"
     reload_cycles = 0
     total_bullets = 0
+    shield_blocked = False
+    ai_target = "player"
+    dealer_item_narration = ""
 
     def inventory_for(owner):
         return player_items if owner == "player" else dealer_items
@@ -87,7 +115,7 @@ init python:
     def draw_item_for(owner):
         if len(inventory_for(owner)) >= MAX_ITEM_SLOTS:
             return None
-        item_name = random.choice(ITEM_POOL)
+        item_name = random.choices(ITEM_POOL, weights=[ITEM_WEIGHTS[item] for item in ITEM_POOL], k=1)[0]
         add_item(owner, item_name)
         return item_name
 
@@ -112,12 +140,19 @@ init python:
         global current_bullet_revealed, battle_message
         if revolver_cylinder:
             current_bullet_revealed = bullet_label(revolver_cylinder[0])
-            battle_message = "Serpihan kaca mengintip isi ruang peluru."
-            renpy.restart_interaction()
+            battle_message = "Serpihan kaca memperlihatkan isi peluru."
             return current_bullet_revealed
         battle_message = "Silinder kosong, tidak ada peluru untuk diintip."
-        renpy.restart_interaction()
         return None
+
+    def use_item_by_slot(owner, slot_index):
+        """Use item from specific slot index"""
+        if slot_index < 0 or slot_index >= MAX_ITEM_SLOTS:
+            return False
+        item = inventory_slot_item(owner, slot_index)
+        if item is None:
+            return False
+        return use_item(owner, item)
 
     def use_item(owner, item_name):
         global player_shield, dealer_shield, player_handcuffed, dealer_handcuffed, battle_message
@@ -133,59 +168,57 @@ init python:
                 player_shield = True
             else:
                 dealer_shield = True
-            battle_message = f"{owner_display_name(owner)} menelan Pil Kebal. Tubuhnya bersinar dengan perlindungan aneh."
+            battle_message = f"{owner_display_name(owner)} menelan Pil Kebal. Tubuhnya diselimuti cahaya."
         elif item_name == "borgol":
             if owner == "player":
                 dealer_handcuffed = True
             else:
                 player_handcuffed = True
-            battle_message = f"{owner_display_name(owner)} memasang borgol pada lawannya dengan tawa sadis."
+            battle_message = f"{owner_display_name(owner)} memasang borgol pada lawannya."
         elif item_name == "serpihan_kaca":
             return reveal_current_bullet()
-
-        draw_item_for(owner)
-        renpy.restart_interaction()
         return True
 
     def shoot_revolver(shooter, target):
-        global player_hp, dealer_hp, player_shield, dealer_shield, current_bullet_revealed, battle_message
+        global player_hp, dealer_hp, player_shield, dealer_shield, current_bullet_revealed, battle_message, shield_blocked
 
         if not revolver_cylinder:
             reload_revolver()
 
         bullet_live = revolver_cylinder.pop(0)
         current_bullet_revealed = None
+        shield_blocked = False
 
         shooter_name = owner_display_name(shooter)
         target_name = owner_display_name(target)
 
         if bullet_live:
+            renpy.sound.play("audio/gunshot.mp3")
             if target == "player":
                 if player_shield:
                     player_shield = False
-                    battle_message = f"Peluru Live menghantam perlindungan. Shield {target_name} pecah dengan suara kaca."
+                    shield_blocked = True
+                    battle_message = f"Live shot! Shield {target_name} hancur, tapi {target_name} selamat."
                 else:
                     player_hp = max(0, player_hp - 1)
-                    battle_message = f"{shooter_name} menarik pelatuk. Pelurunya melaju. {target_name} terjatuh."
+                    battle_message = f"{shooter_name} menembak {target_name}. Live. {target_name} roboh."
             else:
                 if dealer_shield:
                     dealer_shield = False
-                    battle_message = f"Peluru Live menghantam perlindungan. Shield {target_name} pecah dengan suara kaca."
+                    shield_blocked = True
+                    battle_message = f"Live shot! Shield {target_name} hancur, tapi {target_name} selamat."
                 else:
                     dealer_hp = max(0, dealer_hp - 1)
-                    battle_message = f"{shooter_name} menarik pelatuk. Pelurunya melaju. {target_name} terjatuh."
+                    battle_message = f"{shooter_name} menembak {target_name}. Live. {target_name} roboh."
         else:
             if shooter == target:
-                battle_message = f"{shooter_name} menempatkan revolver ke pelipis. Klik. Pelurunya kosong. Ia tersenyum gila."
+                battle_message = f"{shooter_name} menembak diri sendiri. Blank. Hanya suara klik."
             else:
-                battle_message = f"{shooter_name} menembak {target_name}. Klik. Pelurunya kosong."
-
-        draw_item_for(shooter)
+                battle_message = f"{shooter_name} menembak {target_name}. Blank."
 
         if not revolver_cylinder:
             reload_revolver()
 
-        renpy.restart_interaction()
         return bullet_live
 
     def check_end_state():
@@ -201,7 +234,7 @@ init python:
 
     def reset_battle_state():
         global player_hp, dealer_hp, player_shield, dealer_shield, player_handcuffed, dealer_handcuffed
-        global revolver_cylinder, current_bullet_revealed, player_items, dealer_items
+        global revolver_cylinder, current_bullet_revealed
         global battle_message, turn_owner, reload_cycles
 
         player_hp = 1
@@ -216,20 +249,17 @@ init python:
         revolver_cylinder = populate_revolver()
         current_bullet_revealed = None
 
-        player_items = []
-        dealer_items = []
-
         battle_message = f"{owner_display_name('player')} dan {owner_display_name('dealer')} saling menatap di bawah ancaman revolver."
         turn_owner = "player"
         reload_cycles = 0
 
     def dealer_turn_ai():
-        global battle_message
-        action_note = ""
+        global battle_message, ai_target, dealer_item_narration
+        dealer_item_narration = ""
 
         if current_bullet_revealed is None and has_item("dealer", "serpihan_kaca"):
             use_item("dealer", "serpihan_kaca")
-            action_note = f"{owner_display_name('dealer')} mengintip isi silinder dengan serpihan kaca."
+            dealer_item_narration = f"{owner_display_name('dealer')} mengintip peluru dengan serpihan kaca."
 
         known_bullet = current_bullet_revealed
         live_count = sum(1 for bullet in revolver_cylinder if bullet)
@@ -244,22 +274,18 @@ init python:
         if known_bullet == "Live":
             if has_item("dealer", "borgol") and live_count >= max(3, total_count // 2):
                 use_item("dealer", "borgol")
-                action_note = f"{owner_display_name('dealer')} memasang borgol sebelum menembak."
+                dealer_item_narration = f"{owner_display_name('dealer')} memasang borgol pada {owner_display_name('player')}."
             elif has_item("dealer", "pil_kebal") and dealer_hp <= 1 and not dealer_shield:
                 use_item("dealer", "pil_kebal")
-                action_note = f"{owner_display_name('dealer')} menelan Pil Kebal untuk berjaga."
+                dealer_item_narration = f"{owner_display_name('dealer')} menelan Pil Kebal."
 
+            ai_target = "player"
             shot_live = shoot_revolver("dealer", "player")
-            if action_note:
-                battle_message = f"{action_note} {battle_message}"
-                renpy.restart_interaction()
             return shot_live
 
         if known_bullet == "Blank":
+            ai_target = "dealer"
             shot_live = shoot_revolver("dealer", "dealer")
-            if action_note:
-                battle_message = f"{action_note} {battle_message}"
-                renpy.restart_interaction()
             return shot_live
 
         live_ratio = float(live_count) / float(total_count) if total_count else 0.0
@@ -267,21 +293,17 @@ init python:
         if live_ratio >= 0.5:
             if has_item("dealer", "pil_kebal") and dealer_hp <= 1 and not dealer_shield:
                 use_item("dealer", "pil_kebal")
-                action_note = f"{owner_display_name('dealer')} menelan Pil Kebal. Situasi terlalu genting."
+                dealer_item_narration = f"{owner_display_name('dealer')} menelan Pil Kebal."
             elif has_item("dealer", "borgol") and live_ratio >= 0.65:
                 use_item("dealer", "borgol")
-                action_note = f"{owner_display_name('dealer')} memasang borgol untuk menekan {owner_display_name('player')}."
+                dealer_item_narration = f"{owner_display_name('dealer')} memasang borgol pada {owner_display_name('player')}."
 
+            ai_target = "player"
             shot_live = shoot_revolver("dealer", "player")
-            if action_note:
-                battle_message = f"{action_note} {battle_message}"
-                renpy.restart_interaction()
             return shot_live
 
+        ai_target = "dealer"
         shot_live = shoot_revolver("dealer", "dealer")
-        if action_note:
-            battle_message = f"{action_note} {battle_message}"
-            renpy.restart_interaction()
         return shot_live
 
 
@@ -365,7 +387,7 @@ screen roulette_table():
                                     xsize 170
                                     ysize 62
                                     sensitive slot_label != "Kosong"
-                                    action Function(use_item, "player", inventory_slot_item("player", slot_index))
+                                    action Return(("item", slot_index))
 
             hbox:
                 spacing 18
@@ -385,11 +407,12 @@ screen roulette_table():
 
 
 label start:
-    scene bg black with fade
+    scene bg_investigasi with fade
+    play music "audio/investigasi.mp3" fadein 1.0
     
     "Tempat Kejadian Perkara - Pagi Hari"
     ""
-    ar "Sir, saya telah mengumpulkan bukti untuk kasus pembunuhan ini. Ada dua benda yang sangat penting di sini."
+    ar "Pak, saya telah mengumpulkan bukti untuk kasus pembunuhan ini. Ada dua benda yang sangat penting di sini."
     ""
     kp "Dua bukti? Tunjukkan aku, Pendelton."
     ""
@@ -403,7 +426,7 @@ label start:
     ""
     kp "Dua bukti yang menarik, Pendelton. Mana yang akan kamu pilih untuk laporan resmi? Kedua-duanya memiliki arti penting, tapi biasanya satu bukti yang menjadi fokus utama investigasi."
     ""
-    ar "Itu keputusan saya, Sir. Mana yang menurut Anda lebih kuat?"
+    ar "Itu keputusan saya, Pak. Mana yang menurut Anda lebih kuat?"
     ""
     kp "Keputusan itu ada di tanganmu. Pilih dengan bijak."
 
@@ -424,8 +447,8 @@ label start:
 
 
 label hospital_scene:
-    scene bg black with fade
-    
+    scene bg_anak_rumah_sakit with fade
+    play music "audio/hospital.mp3" fadein 1.0
     "Rumah Sakit - Waktu yang Sama"
     ""
     "Tabitha sedang merapihkan mainan anak-anak di ruang perawatan pediatrik dengan tangan yang lembut."
@@ -461,17 +484,17 @@ label hospital_scene:
 
 
 label gossip_scene:
-    scene bg black with fade
-    
+    scene bg_gosip_rumah_sakit with fade
+    play music "audio/gossip.mp3" fadein 1.0
     "Rumah Sakit - Kamar Istirahat - Sore Hari"
     ""
-    "Tiga perawat, Amelia, Clara, dan Elena, berkumpul di kamar istirahat sambil membuat kopi."
+    "Tiga perawat, Amelia, Clara, dan Elena, berkumpul di ruang istirahat sambil membuat kopi."
     ""
     am "Duh, lihat Tabitha tadi? Segala sesuatu dia selesaikan sendiri, seolah-olah kita semua tidak berguna."
     ""
     cl "Iya! Dia kasar sekali kalau bicara. Pas aku minta bantuan kemarin, dia malah bentakin aku."
     ""
-    el "Kalian tau ngga? Dia main dengan anak-anak itu, berpura-pura baik, tapi di belakang sangat jahat."
+    el "Kalian tau ngga? Dia kalo main bareng anak-anak kelihatannya baik banget, tapi kalo di belakang jahat sebenernya."
     ""
     am "Exactly! Perilaku twoface banget. Seperti dia punya dua wajah."
     ""
@@ -485,8 +508,7 @@ label gossip_scene:
 
 
 label manager_office_scene:
-    scene bg black with fade
-    
+    scene bg_ruang_manager with fade
     "Ruang Manager Rumah Sakit - Sore Hari"
     ""
     mr "..."
@@ -517,8 +539,7 @@ label manager_office_scene:
 
 
 label firing_scene:
-    scene bg black with fade
-    
+    scene bg_anak_rumah_sakit with fade
     "Ruang Perawatan - Setelah Tabitha Selesai Bermain dengan Anak"
     ""
     "Tabitha sedang merapihkan mainan terakhir ketika manager datang dengan wajah serius."
@@ -549,8 +570,8 @@ label firing_scene:
 
 
 label tabitha_leaving_hospital:
-    scene bg black with fade
-    
+    scene bg_loker_rumah_sakit with fade
+    stop music fadeout 2.0
     "Tabitha berjalan ke loker untuk mengambil barang pribadi. Tangan nya gemetar karena kemarahan."
     ""
     ta "Aku tidak layak mendapat perlakuan ini... Mereka bohong. Semua bohong!"
@@ -565,13 +586,13 @@ label tabitha_leaving_hospital:
 
 
 label arthur_police_station:
-    scene bg black with fade
-    
+    scene bg_kantor_polisi with fade
+    play music "audio/police.mp3" fadein 1.0
     "Kantor Polisi - Hari Berikutnya - Siang Hari"
     ""
     "Arthur datang untuk menanyakan hasil penyelidikan kasusnya. Dia masuk ke ruang kepala polisi dengan kepercayaan diri."
     ""
-    ar "Sir, saya ingin mengetahui perkembangan kasus pembunuhan itu. Sudah diaresto?"
+    ar "Pak, saya ingin mengetahui perkembangan kasus pembunuhan itu. Sudah diaresto?"
     ""
     kp "Pendelton... duduk."
     ""
@@ -601,9 +622,9 @@ label arthur_police_station:
 
 
 label tabitha_arrives_home:
-    scene bg black with fade
-    
-    "Rumah Arthur dan Tabitha - Sore Hari"
+    scene bg_rumah with fade
+    play music "audio/destruction.mp3" fadein 1.0
+    "Rumah Arthur dan Tabitha - Malam Hari"
     ""
     "Tabitha tiba di rumah duluan. Dia berjalan ke depan rumah dengan pikiran yang masih kalut dari pengalaman di rumah sakit."
     ""
@@ -627,8 +648,7 @@ label tabitha_arrives_home:
 
 
 label house_destruction:
-    scene bg black with fade
-    
+    scene bg_berantakan with fade
     "Dalam Rumah"
     ""
     "Tabitha mulai merusak barang-barang di rumah. Gelas pecah, bantal dilempar, meja terbalik. Emosi yang terpendam selama berbulan-bulan meledak dalam sekejap."
@@ -641,8 +661,7 @@ label house_destruction:
 
 
 label arthur_arrives_home:
-    scene bg black with fade
-    
+    scene bg_rumah with fade
     "Sekitar 5 menit kemudian, Arthur tiba di rumah. Dia sudah tahu sesuatu salah ketika melihat pintu terbuka dan kotoran anjing di depan jendela."
     ""
     ar "Apa yang...?"
@@ -673,13 +692,17 @@ label arthur_arrives_home:
 
 
 label roulette_proposal:
-    scene bg black with fade
-    
-    "Setelah berdebat selama hampir satu jam, Arthur dan Tabitha sama-sama lelah. Lelah fisik, lelah mental, lelah secara emosional."
+    scene bg_ruang_tamu with fade
+    play music "audio/roulette.mp3" fadein 1.0
+    "Berjam-jam mereka saling berteriak. Menyalahkan. Menghujat. Hancur."
+    ""
+    "Sekarang, hanya ada kelelahan yang menggerogoti tulang."
     ""
     ar "Kita tidak bisa lanjut seperti ini."
     ""
     ta "Aku tahu."
+    ""
+    "Diam panjang. Hanya jam dinding yang berdetak, menghitung mundur sesuatu yang tidak bisa mereka hindari."
     ""
     ar "Setiap hari kita saling menyakiti. Setiap hari sama saja."
     ""
@@ -689,117 +712,171 @@ label roulette_proposal:
     ""
     ta "Apa maksudmu?"
     ""
+    "Arthur menatap Tabitha. Bukan dengan cinta. Bukan dengan benci. Tapi dengan sesuatu yang jauh lebih gelap—penerimaan."
+    ""
     ar "Roulette."
+    ""
+    "Kata itu menggantung di udara. Berat. Tidak bisa ditarik kembali."
     ""
     ta "..."
     ""
     ta "Baik."
     ""
-    "Mereka mengeluarkan revolver dari lemari. Revolver yang sudah mereka persiapkan sejak lama untuk situasi seperti ini. Sebuah keputusan yang final. Sebuah permainan yang tidak ada pemenang sejati."
+    "Mereka berjalan ke lemari tua di sudut ruangan. Dari dalam, Arthur mengeluarkan sebuah revolver perak yang sudah lama disimpan."
+    "Revolver yang sudah mereka persiapkan sejak lama. Untuk situasi seperti ini."
+    "Atau mungkin, revolvers inilah satu-satunya alasan mereka bertahan sejauh ini."
+    ""
+    "Sebuah keputusan yang final. Sebuah permainan yang tidak ada pemenang sejati."
 
     jump character_selection
 
 
 label character_selection:
-    scene black with fade
-    
-    "Sebelum permainan dimulai, ada satu pilihan terakhir yang harus dibuat."
+    scene bg_ruang_tamu with fade
+    "Di tengah ruangan yang berantakan, di antara pecahan kaca dan kenangan yang hancur, mereka berdiri saling berhadapan."
+    "Revolver di tangan. Takdir di ujung laras."
     ""
-    "Kamu akan memainkan siapa?"
+    "Satu pertanyaan terakhir. Satu keputusan yang akan menentukan segalanya."
+    ""
+    "Siapa yang akan memegang kendali?"
+    "Siapa yang akan menarik pelatuk pertama?"
+    "Siapa yang akan menjadi algojo—dan siapa yang akan menjadi korban?"
     ""
 
     menu:
-        "Arthur Pendelton (Detektif)":
+        "Arthur Pendelton — Detektif":
             $ player_character = "arthur"
+            "Arthur melangkah maju. Wajahnya keras, tapi matanya—matanya kosong."
             ar "Baik. Aku yang mulai."
         
-        "Tabitha Vane (Perawat)":
+        "Tabitha Vane — Perawat":
             $ player_character = "tabitha"
+            "Tabitha mengambil revolver dari tangan Arthur. Jari-jarinya melingkar di gagangnya dengan familiaritas yang mengerikan."
             ta "Baik. Aku yang mulai."
 
-    "Permainan dimulai."
+    "Tirai telah dibuka. Pertunjukan paling kelam dalam hidup mereka akan segera dimulai."
 
     jump secret_chest_preparation
 
 
 label secret_chest_preparation:
-    scene bg black with fade
-    
-    "Di tengah ruang tamu, ada peti kayu tua yang mereka letakkan di lantai. Di dalamnya tersimpan tiga item misterius, masing-masing dalam kotak tertutup."
+    scene bg_ruang_tamu with fade
+    "Arthur membuka sebuah peti kayu tua di sudut ruangan. Engselnya berderit, seperti suara terakhir seseorang sebelum mati."
     ""
+    "Di dalamnya, tiga kotak misterius tersusun rapi. Masing-masing berisi benda yang bisa menjadi penyelamat—atau penunda kematian."
+    ""
+    $ player_items = []
+    $ dealer_items = []
     if player_character == "arthur":
-        ar "Setiap kita ambil dua item dari peti ini. Item ini akan membantu kita bertahan atau memberikan keuntungan di permainan."
-        ta "Baik. Kamu ambil dulu."
+        ar "Dua item. Masing-masing dari kita ambil dua."
+        "Suara Arthur datar. Seperti sedang membicarakan daftar belanja, bukan perlengkapan untuk permainan maut."
+        ta "Kau duluan."
     else:
-        ta "Setiap kita ambil dua item dari peti ini. Item ini akan membantu kita bertahan atau memberikan keuntungan di permainan."
-        ar "Baik. Kamu ambil dulu."
+        ta "Dua item. Masing-masing dari kita ambil dua."
+        "Suara Tabitha tenang. Terlalu tenang."
+        ar "Kau duluan."
 
-    "Mari kita lihat apa yang ada di peti ini..."
+    "Mari kita lihat apa yang menunggu di dalam peti ini..."
 
     jump player_draws_items
 
 
 label player_draws_items:
     if player_character == "arthur":
-        ar "Oke, aku ambil item pertama..."
-        $ item1 = draw_item_for("player")
-        ar f"Aku mendapat {ITEM_NAMES[item1]}."
+        "Arthur memasukkan tangannya ke dalam peti. Jari-jarinya meraba-raba di antara benda-benda dingin."
         ""
-        ar "Dan item kedua..."
+        $ item1 = draw_item_for("player")
+        if item1 is not None:
+            "Dia menarik satu benda. [ITEM_NAMES[item1]]. Berguna. Atau setidaknya, lebih baik daripada tidak sama sekali."
+        else:
+            "Peti itu kosong. Tidak ada yang tersisa."
+        ""
+        "Satu lagi."
         $ item2 = draw_item_for("player")
-        ar f"Aku juga mendapat {ITEM_NAMES[item2]}."
+        if item2 is not None:
+            "Dia mengambil yang kedua. [ITEM_NAMES[item2]]."
+        else:
+            "Tidak ada lagi."
         ""
         jump dealer_draws_items
     else:
-        ta "Oke, aku ambil item pertama..."
-        $ item1 = draw_item_for("player")
-        ta f"Aku mendapat {ITEM_NAMES[item1]}."
+        "Tabitha merogoh peti. Tangannya tidak ragu-ragu."
         ""
-        ta "Dan item kedua..."
+        $ item1 = draw_item_for("player")
+        if item1 is not None:
+            "Benda pertama. [ITEM_NAMES[item1]]. Senyum tipis mengembang di wajahnya."
+        else:
+            "Peti itu kosong."
+        ""
+        "Satu lagi."
         $ item2 = draw_item_for("player")
-        ta f"Aku juga mendapat {ITEM_NAMES[item2]}."
+        if item2 is not None:
+            "[ITEM_NAMES[item2]]. Cukup untuk bertahan."
+        else:
+            "Tidak ada."
         ""
         jump dealer_draws_items
 
 
 label dealer_draws_items:
     if player_character == "arthur":
-        ta "Sekarang giliran aku..."
-        $ item3 = draw_item_for("dealer")
-        ta f"Aku mendapat {ITEM_NAMES[item3]}."
+        ta "Giliranku."
+        "Tabitha merogoh peti dengan gerakan yang anggun—tapi mengancam."
         ""
-        ta "Dan item kedua..."
+        $ item3 = draw_item_for("dealer")
+        if item3 is not None:
+            ta "[ITEM_NAMES[item3]]. Kau pasti suka kalau aku pakai ini nanti."
+        else:
+            ta "Habis."
+        ""
+        ta "Dan satu lagi."
         $ item4 = draw_item_for("dealer")
-        ta f"Aku juga mendapat {ITEM_NAMES[item4]}."
+        if item4 is not None:
+            ta "[ITEM_NAMES[item4]]."
+        else:
+            ta "Tidak ada lagi."
     else:
-        ar "Sekarang giliran aku..."
-        $ item3 = draw_item_for("dealer")
-        ar f"Aku mendapat {ITEM_NAMES[item3]}."
+        ar "Giliranku."
+        "Arthur mengambil alih peti."
         ""
-        ar "Dan item kedua..."
+        $ item3 = draw_item_for("dealer")
+        if item3 is not None:
+            ar "[ITEM_NAMES[item3]]. Ini cukup untuk membuatmu berpikir dua kali."
+        else:
+            ar "Habis."
+        ""
+        ar "Satu lagi."
         $ item4 = draw_item_for("dealer")
-        ar f"Aku juga mendapat {ITEM_NAMES[item4]}."
+        if item4 is not None:
+            ar "[ITEM_NAMES[item4]]."
+        else:
+            ar "Tidak ada lagi."
 
     jump revolver_loading
 
 
 label revolver_loading:
-    scene bg black with fade
-    
+    scene bg_ruang_tamu with fade
     if player_character == "arthur":
-        ar "Sekarang untuk revolver."
-        ar "Aku muat peluru."
+        "Arthur mengambil revolver. Silindernya terbuka dengan bunyi klik yang tajam."
+        ""
         $ reset_battle_state()
         $ turn_owner = "player"
-        ar f"Ada {total_bullets} peluru. {sum(1 for b in revolver_cylinder if b)} yang hidup. {total_bullets - sum(1 for b in revolver_cylinder if b)} yang kosong."
-        ar "Kamu mau mencoba keberuntunganmu terlebih dahulu. Kamu mulai."
+        $ previous_turn = "dealer"
+        "Dia memasukkan peluru satu per satu. [total_bullets] butir. [sum(1 for b in revolver_cylinder if b)] di antaranya hidup. [total_bullets - sum(1 for b in revolver_cylinder if b)] kosong."
+        "Silinder berputar. Nasib acak yang tidak bisa diprediksi."
+        ""
+        ar "Kau mulai."
     else:
-        ta "Sekarang untuk revolver."
-        ta "Aku muat peluru."
+        "Tabitha memutar silinder revolver. Jari-jarinya bergerak dengan keahlian yang mengganggu."
+        ""
         $ reset_battle_state()
         $ turn_owner = "player"
-        ta f"Ada {total_bullets} peluru. {sum(1 for b in revolver_cylinder if b)} yang hidup. {total_bullets - sum(1 for b in revolver_cylinder if b)} yang kosong."
-        ta "Kamu mau mencoba keberuntunganmu terlebih dahulu. Kamu mulai."
+        $ previous_turn = "dealer"
+        "Dia memasukkan peluru. [total_bullets] butir. [sum(1 for b in revolver_cylinder if b)] hidup. [total_bullets - sum(1 for b in revolver_cylinder if b)] kosong."
+        "Silinder berputar. Roda roulette tanpa ampun."
+        ""
+        ta "Kau mulai."
 
     jump battle_turn
 
@@ -816,73 +893,280 @@ label battle_turn:
             $ turn_owner = "dealer"
             jump battle_turn
 
+        if previous_turn == "dealer":
+            $ previous_turn = "player"
+            scene bg black with fade
+            if player_character == "arthur":
+                "Arthur memegang revolver lagi."
+            else:
+                "Revolver kembali ke tangan Tabitha."
+
         call screen roulette_table
         $ player_choice = _return
 
-        if player_choice == "shoot_dealer":
+        if isinstance(player_choice, tuple) and player_choice[0] == "item":
+            $ slot_index = player_choice[1]
+            $ use_item_by_slot("player", slot_index)
+            jump battle_turn
+
+        elif player_choice == "shoot_dealer":
             $ shot_live = shoot_revolver("player", "dealer")
-            $ turn_owner = "dealer" if shot_live else "player"
+            $ turn_owner = "dealer"
+            jump player_to_dealer_transition
+
         elif player_choice == "shoot_self":
             $ shot_live = shoot_revolver("player", "player")
-            $ turn_owner = "dealer" if shot_live else "player"
+            if not shot_live:
+                $ turn_owner = "player"
+            else:
+                if player_hp <= 0:
+                    jump ending_player_self_shot
+                elif shield_blocked:
+                    $ turn_owner = "dealer"
+                    $ previous_turn = "player"
+                    jump shield_saved_self_shot
+                else:
+                    $ turn_owner = "dealer"
+                    $ previous_turn = "player"
+                    jump player_to_dealer_transition
 
         jump battle_turn
 
-    if dealer_handcuffed:
+    # Dealer's turn
+    $ dealer_handcuff_skip = dealer_handcuffed
+    if dealer_handcuff_skip:
         $ dealer_handcuffed = False
         $ battle_message = f"{owner_display_name('dealer')} kehilangan giliran karena borgol."
         $ turn_owner = "player"
         jump battle_turn
 
-    $ shot_live = dealer_turn_ai()
-    $ turn_owner = "player" if shot_live else "dealer"
+    if previous_turn == "player":
+        $ previous_turn = "dealer"
+        scene bg black with fade
+        if player_character == "arthur":
+            "Arthur menyerahkan revolver. Tabitha mengambilnya."
+        else:
+            "Revolver berpindah ke tangan Arthur."
+
+    call dealer_turn_scene
     jump battle_turn
+
+
+label player_to_dealer_transition:
+    scene bg black with fade
+    $ previous_turn = "dealer"
+    if player_character == "arthur":
+        "Arthur meletakkan revolver."
+    else:
+        "Tabitha menyerahkan revolver."
+    
+    jump battle_turn
+
+
+label dealer_turn_scene:
+    scene bg black with fade
+    
+    if player_character == "arthur":
+        ta "Giliranku, Arthur."
+    else:
+        ar "Giliranku, Tabitha."
+
+    $ shot_live = dealer_turn_ai()
+    if dealer_item_narration:
+        "[dealer_item_narration]"
+    "[battle_message]"
+    
+    if shot_live:
+        $ turn_owner = "player"
+    elif ai_target == "player":
+        $ turn_owner = "player"
+    else:
+        $ turn_owner = "dealer"
+    
+    return
 
 
 label ending_player_wins:
     scene bg black with fade
     
     if player_character == "arthur":
-        ar "Tabitha..."
-        "Arthur menatap jasad Tabitha. Dunia yang dingin, penuh kebohongan, tiba-tiba terasa lebih dingin lagi."
+        "Tabitha terjatuh. Tubuhnya yang mungil bergerak lemah di lantai kayu yang dingin."
+        "Revolver di tangan Arthur masih mengeluarkan asap tipis."
         ""
-        ar "Dunia ini tidak punya arti tanpa kekacauan hangat yang kau bawa. Bahkan dalam kebencian, kau membuat sesuatu yang nyata."
+        "Dia menatap wanita di depannya. Tabitha—yang pernah menjadi istrinya."
         ""
-        "Arthur menangis. Kemudian, dengan tangan gemetar, dia mengarahkan revolver ke kepalanya sendiri dan menarik pelatuk."
+        "Dunia tiba-tiba terasa begitu sunyi."
+        ""
+        ta "Arthur..."
+        "Suara Tabitha hampir tidak terdengar. Seperti bisikan dari dunia lain."
+        ""
+        ta "Kau tahu... di antara semua orang... kau satu-satunya yang membuatku merasa hidup."
+        "Dia tersenyum. Senyum yang sakit. Senyum yang hancur."
+        ""
+        ta "Atau mungkin... mati."
+        ""
+        "Tangannya jatuh. Matanya kosong menatap langit-langit."
+        ""
+        "Arthur berdiri di tengah keheningan. Sendirian. Dengan revolver yang masih hangat di genggaman."
+        ""
+        "Dunia tidak pernah adil. Tapi kenyataan tidak pernah meminta persetujuan."
+        "Dia mengangkat revolver. Perlahan. Pasti."
+        "Ke pelipisnya sendiri."
+        ""
+        "Mungkin, di dunia yang lebih baik, mereka bisa saling mencintai tanpa harus saling membunuh."
+        ""
+        "Tapi dunia ini bukan tempat untuk orang baik."
+        ""
+        "BANG."
         scene black with fade
     else:
-        ta "Arthur..."
-        "Tabitha menatap jasad Arthur. Kesunyian ruangan terasa membelah dada."
+        "Arthur terjatuh. Tubuhnya yang besar ambruk dengan suara berat."
+        "Tabitha berdiri gemetar. Revolver di tangannya terasa begitu berat."
         ""
-        ta "Kamu adalah orang pertama yang mencoba memahami aku. Dan aku membunuhmu. Dunia ini memang kejam, bukan?"
+        "Dia menatap pria yang dulu pernah dia percaya. Yang dulu pernah dia cintai."
         ""
-        "Kegilaan Tabitha mencapai puncaknya. Dia keluar dari rumah dengan mata yang kosong, mencari tiga wanita yang menghancurkan hidupnya."
+        ar "Tabitha..."
+        "Arthur tersenyum. Darah mengalir dari sudut bibirnya."
+        ""
+        ar "Kau hebat... kau benar-benar..."
+        "Napasnya terhenti."
+        ""
+        "Tabitha menjerit. Bukan karena kemenangan. Bukan karena kegembiraan."
+        "Jeritan seorang wanita yang kehilangan satu-satunya orang yang tersisa di dunia yang kejam ini."
+        ""
+        "Dengan mata kosong dan tangan berlumuran darah, dia melangkah keluar dari rumah."
+        "Masih ada tiga orang yang harus dikunjungi."
+        "Amelia. Clara. Elena."
+        "Dendam adalah satu-satunya alasan dia masih bernapas."
         scene black with fade
 
-    return
+    jump ending_credits
 
 
 label ending_player_loses:
     scene bg black with fade
     
     if player_character == "arthur":
-        ta "Arthur..."
-        "Tabitha menatap jasad Arthur. Dalam amarah dan dendam, dia telah membunuh satu-satunya orang yang memahaminya."
+        "Arthur terjatuh. Darah mulai menggenang di sekitar tubuhnya."
+        "Tabitha berdiri, revolver masih di tangan. Asap tipis keluar dari larasnya."
         ""
-        ta "Dunia ini sudah mengalahkan kita. Sekarang giliran aku."
+        "Dia menatap suaminya yang tergeletak. Hening."
         ""
-        "Kegilaan Tabitha meledak. Dia meninggalkan rumah dalam keadaan penuh dendam, mencari balas dendam terhadap tiga wanita yang menghancurkan segalanya."
+        ta "Kau selalu berusaha menyelamatkan orang, Arthur. Bahkan saat kau sendiri yang perlu diselamatkan."
+        "Suaranya bergetar. Bukan karena tangis. Tapi karena sesuatu yang lebih kelam."
+        ""
+        ta "Sekarang, siapa yang akan menyelamatkan aku?"
+        ""
+        "Dia berbalik. Langkahnya meninggalkan rumah, meninggalkan mayat, meninggalkan masa lalu."
+        "Di luar, tiga nama terukir di pikirannya."
+        "Amelia. Clara. Elena."
+        "Dunia ini akan merasakan apa yang dia rasakan."
         scene black with fade
     else:
-        ar "Tabitha..."
-        "Arthur menatap jasad Tabitha dengan hati yang pecah."
+        "Tabitha jatuh. Tubuhnya mendarat dengan bunyi yang menghancurkan jiwa."
+        "Arthur berdiri diam. Menatap wanita yang dulu dia kenal."
         ""
-        ar "Aku gagal menyelamatkan dirinya. Aku gagal menyelamatkan kita."
+        "Dia mondar-mandir. Tangannya memegang kepala. Rambutnya kusut."
         ""
-        "Arthur mengarahkan revolver ke kepalanya sendiri. Dalam kegelapan dan keputusasaan, dia menarik pelatuk terakhirnya."
+        ar "Tidak... tidak, tidak, tidak..."
+        "Dia berhenti. Menatap revolver di tangannya."
+        ""
+        ar "Aku gagal. Lagi. Lagi. LAGI."
+        "Dengan gerakan yang tiba-tiba tenang, dia mengangkat revolver."
+        ""
+        ar "Aku datang, Tabitha."
+        ""
+        "BANG."
         scene black with fade
 
-    return
+    jump ending_credits
+
+
+label ending_player_self_shot:
+    scene bg black with fade
+    
+    if player_character == "arthur":
+        "Arthur mengarahkan laras revolver ke pelipisnya sendiri."
+        "Tidak ada keraguan di matanya. Hanya kehampaan yang dalam."
+        "Jarinya bergerak."
+        ""
+        "BANG."
+        ""
+        "Suara letusan memenuhi ruangan. Tubuh Arthur ambruk. Darah mulai mengalir, membasahi lantai kayu yang tadinya bersih."
+        "Matanya masih terbuka. Menatap langit-langit yang retak."
+        ""
+        "Keheningan yang mencekik."
+        ""
+        ta "ARTHUR!"
+        "Tabitha menjatuhkan diri di samping tubuh Arthur. Tangannya meraba-raba mencari denyut nadi."
+        "Tidak ada."
+        ""
+        ta "Tidak... tidak... kau tidak bisa... kau tidak boleh..."
+        "Gemetar. Air mata mulai jatuh. Tapi bukan air mata kesedihan—melainkan air mata kemarahan."
+        ""
+        ta "KAUBIARKAN AKU SENDIRIAN?! KAU TINGGALKAN AKU DI DUNIA INI? SENDIRIAN?!"
+        "Dia memukul lantai. Berulang kali. Sampai buku jarinya memar dan berdarah."
+        ""
+        "Dengan napas yang tidak beraturan, Tabitha bangkit. Darah Arthur masih menempel di tangannya."
+        "Tanpa sepatah kata, dia berjalan keluar dari rumah itu."
+        "Ada tiga nama yang harus dia kunjungi."
+        "Ada banyak nyawa yang harus dibayar."
+        scene black with fade
+    else:
+        "Tabitha menekan laras revolver ke pelipisnya. Tangannya tidak gemetar."
+        "Matanya kosong. Jiwanya sudah pergi lebih dulu sebelum peluru meninggalkan ruang silinder."
+        ""
+        "BANG."
+        ""
+        "Tubuhnya roboh. Genangan darah perlahan meluas di lantai."
+        "Wajahnya tetap tenang. Seolah-olah kematian adalah teman lama yang sudah ditunggu."
+        ""
+        "Arthur berlari. Tersandung. Jatuh. Merangkak ke samping tubuh Tabitha."
+        ""
+        ar "TABITHA! BUKA MATAMU! LIHAT AKU!"
+        "Dia mengguncang tubuh yang sudah tidak bernyawa itu."
+        ""
+        ar "KAU... KAU BODOH! KAU TIDAK PUNYA HAK UNTUK PERGI!"
+        "Tangisnya pecah. Pria yang selama ini kuat, akhirnya runtuh."
+        ""
+        "Berjam-jam dia duduk di sana. Memegang tangan Tabitha yang sudah dingin."
+        "Revolver tergeletak di sampingnya."
+        ""
+        "Dia mengambilnya. Menatapnya lama."
+        "Lalu, diam-diam, dia bangkit dan berjalan keluar."
+        "Bukan untuk mati."
+        "Tapi untuk membalaskan dendam yang bahkan dia sendiri tidak yakin milik siapa."
+        scene black with fade
+
+    jump ending_credits
+
+
+label shield_saved_self_shot:
+    scene bg black with fade
+    
+    if player_character == "arthur":
+        "Arthur mengarahkan revolver ke pelipisnya."
+        ""
+        "BANG!"
+        ""
+        "Peluru berhenti. Shield-nya menyala. Arthur selamat."
+        ""
+        ta "Arthur!"
+        ta "Kau... masih hidup."
+        ta "Giliranku."
+    else:
+        "Tabitha mengarahkan revolver ke pelipisnya."
+        ""
+        "BANG!"
+        ""
+        "Peluru berhenti. Shield-nya menyala. Tabitha selamat."
+        ""
+        ar "Tabitha!"
+        ar "Kau baik-baik saja?"
+        ar "Giliranku."
+    
+    $ turn_owner = "dealer"
+    jump player_to_dealer_transition
 
 
 label ending_draw:
@@ -925,4 +1209,28 @@ label ending_draw:
         "Dua pelatuk ditarik dalam harmoni yang mengerikan."
         scene black with fade
 
+    jump ending_credits
+
+
+label ending_credits:
+    stop music fadeout 2.0
+    $ renpy.pause(1.0)
+    play music "audio/ending.mp3" fadein 1.0
+    scene black
+    $ renpy.pause(0.5)
+    show screen ending_text("THE END")
+    $ renpy.pause(3.0, hard=True)
+    hide screen ending_text
+    $ renpy.pause(0.5)
+    show screen ending_text("A Game by Hazwan Adhikara Nasution")
+    $ renpy.pause(4.0, hard=True)
+    hide screen ending_text
+    stop music fadeout 2.0
     return
+
+screen ending_text(msg):
+    text msg:
+        color "#FFFFFF"
+        size 60
+        xalign 0.5
+        yalign 0.5
